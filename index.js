@@ -18,23 +18,9 @@ function ProteusSensor(log, config) {
 	this.type = config.type;
 	this.invert = !!config.invert;
 	this.host = config.host;
-	this.url = config.url || ('http://' + sensor.host + '/status.json');
+	this.url = config.url || ('http://' + this.host + '/status.json');
 	this.interval = config.interval || 2000;
 };
-
-/*ProteusSensor.prototype.configureAccessory = function(accessory) {
-	var platform = this;
-	this.log(accessory.displayName, "configure accessory");
-
-	// we'll mark it reachable once we poll it for the first time
-	accessory.reachable = false;
-
-	var sensor = platform.sensors[accessory.displayName];
-	if (!sensor) return;
-
-	sensor.accessory = accessory;
-	this.setupSensor(sensor);
-};*/
 
 ProteusSensor.prototype.identify = function(callback) {
 	// we don't have a way to identify
@@ -50,11 +36,14 @@ ProteusSensor.prototype.getServices = function() {
 		.setCharacteristic(Characteristic.SerialNumber, "Unknown")
 		.setCharacteristic(Characteristic.FirmwareRevision, "Unknown");
 
-	switch (sensor.type) {
+	var services = [ this.infoService ];
+
+	switch (this.type) {
 		case 'level':
 			this.infoService.setCharacteristic(Characteristic.Model, "Level Sensor");
 
 			this.leakService = new Service.LeakSensor();
+			services.push(this.leakService);
 			this.leakDetected = this.leakService.getCharacteristic(Characteristic.LeakDetected);
 			this.statusActive = this.leakService.getCharacteristic(Characteristic.StatusActive);
 			this.statusFault = this.leakService.getCharacteristic(Characteristic.StatusFault);
@@ -65,9 +54,11 @@ ProteusSensor.prototype.getServices = function() {
 
 		default:
 			this.infoService.setCharacteristic(Characteristic.Model, "Unknown");
-			this.log(sensor.name, "unknown sensor type: " + sensor.type);
+			this.log(this.name, "unknown sensor type: " + this.type);
 			break;
 	}
+
+	return services;
 };
 
 ProteusSensor.prototype.setupPolling = function() {
