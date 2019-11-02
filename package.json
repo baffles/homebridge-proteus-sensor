@@ -15,6 +15,10 @@
     "url": "https://github.com/baffles/homebridge-proteus-sensor/issues"
   },
   "homepage": "https://github.com/baffles/homebridge-proteus-sensor#readme",
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
   "dependencies": {
     "hap-nodejs": "^0.5.1",
     "polling-to-event": "^2.1.0",
